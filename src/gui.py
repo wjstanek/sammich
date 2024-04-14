@@ -1,22 +1,9 @@
 import PySimpleGUI as sg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, FigureCanvasAgg
 from matplotlib.figure import Figure
-import math
 import time
-import threading
 
 REFRESH_TIME = 100
-
-
-class Data:
-    speed = [float(0)]
-    init_time = time.time()
-
-    def update(self):
-        self.speed.append(
-            1-math.cos(time.time())
-        )
-        print(self.speed[-1])
 
 
 class SimpleGUI:
@@ -25,9 +12,13 @@ class SimpleGUI:
     def __init__(self):
         self.layout = [
             [sg.Text('AutoSammich')],
-            [sg.Text(f'Speed: \t'), sg.Text(key='-SPEED-')],
+            [sg.Text(f'Time: \t\t'), sg.Text(key='-TIME-')],
+            [sg.Text(f'Speed: \t\t'), sg.Text(key='-SPEED-')],
+            [sg.Text(f'Last Message: \t'), sg.Text(key='-MSG-')],
+            [sg.Text(f'Rec\'d at: \t\t'), sg.Text(key='-MSG_TIME-')],
             [sg.Button("pause"), sg.Button("resume")],
-            [sg.Canvas(size=(640, 240), key='-CANVAS-')]
+            [sg.Canvas(size=(640, 240), key='-CANVAS-')],
+            [sg.Button("EXIT")],
         ]
         self.window = sg.Window('AUTOSAMMICH', self.layout, finalize=True)
 
@@ -52,27 +43,41 @@ class SimpleGUI:
             elif event == 'resume':
                 paused = False
             if not paused:
-                self._update_window()
+                self.update_window()
 
         self.window.close()
 
-    # def _get_new_data(self):
-    #     self.speed.append(round(1-math.cos(time.time()), 2))
+    def update_window(self, data):
+        # Display last time
+        elapsed_time = data.get_data_dict()['time']
+        self.window['-TIME-'].update(elapsed_time[-1])
 
-    def _update_window(self):
-        self.window['-SPEED-'].update(self.data.speed[-1])
+        # Keep speed up to date
+        speed = data.get_data_dict()['speed']
+        self.window['-SPEED-'].update(speed[-1])
+
+        # Use last known message
+        msg = data.get_data_dict()['msg']
+        for i in range(len(msg)):
+            if msg[-i] is None:
+                break
+            elif msg[-i] != msg[-i-1]:
+                self.window['-MSG-'].update(msg[-i])
+                self.window['-MSG_TIME-'].update(elapsed_time[-i])
+
         self.ax.cla()
         self.ax.grid()
-        if len(self.speed) < 100:
-            self.ax.plot(range(0, len(self.speed)), self.speed, color='red')
+        if len(speed) < 100:
+            self.ax.plot(range(0, len(speed)), speed, color='red')
         else:
-            self.ax.plot(range(0, 100), self.speed[-100:], color='blue')
-        self.fig_agg.draw()
+            self.ax.plot(range(0, 100), speed[-100:], color='blue')
+        self.fig_agg.draw_idle()
+
 
 
 def draw_figure(canvas, figure, loc=(0, 20)):
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
-    figure_canvas_agg.draw()
+    figure_canvas_agg.draw_idle()
     figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
     return figure_canvas_agg
 
@@ -80,11 +85,6 @@ def draw_figure(canvas, figure, loc=(0, 20)):
 # test run
 if __name__ == '__main__':
 
-    data = Data()
     gui = SimpleGUI()
-    gui_thread = threading.Thread(target=gui.run, name='gui')
-    gui_thread.start()
     while True:
-        data.update()
-        gui.data = data
         time.sleep(REFRESH_TIME/1000)
