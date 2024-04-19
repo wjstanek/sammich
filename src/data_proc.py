@@ -58,7 +58,7 @@ class FakeData(BaseData):
             new_speed = (interval * speed_ramp_rate) + last_known_speed     # y = mx + b
             if new_speed >= 5.0:
                 self.ramp_up = False
-            self._update_raw_data(update_time, round(new_speed, 2), None)
+            self._update_raw_data(update_time, round(new_speed, 2), "")
         else:
             new_speed = last_known_speed + 0.1 * random.randrange(-5, 5)
             if new_speed > 6:

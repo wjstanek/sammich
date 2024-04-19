@@ -8,6 +8,7 @@ REFRESH_TIME = 100
 
 class SimpleGUI:
     data = object()
+    paused = False
 
     def __init__(self):
         self.layout = [
@@ -33,16 +34,15 @@ class SimpleGUI:
         self.fig_agg = draw_figure(canvas, fig)
 
     def run(self):
-        paused = False
         while True:
             event, values = self.window.read()
             if event == sg.WIN_CLOSED:
                 break
-            elif event == 'pause':
-                paused = True
-            elif event == 'resume':
-                paused = False
-            if not paused:
+            elif event == "pause":
+                self.paused = True
+            elif event == "resume":
+                self.paused = False
+            else:
                 self.update_window()
 
         self.window.close()
@@ -58,21 +58,23 @@ class SimpleGUI:
 
         # Use last known message
         msg = data.get_data_dict()['msg']
-        for i in range(len(msg)):
-            if msg[-i] is None:
+        for i in range(1, len(msg)+1):
+            if msg[-i] == self.window['-MSG-'].get():
                 break
-            elif msg[-i] != msg[-i-1]:
+            elif msg[-i] != "":
                 self.window['-MSG-'].update(msg[-i])
                 self.window['-MSG_TIME-'].update(elapsed_time[-i])
+                break
 
-        self.ax.cla()
-        self.ax.grid()
-        if len(speed) < 100:
-            self.ax.plot(range(0, len(speed)), speed, color='red')
-        else:
-            self.ax.plot(range(0, 100), speed[-100:], color='blue')
+        if not self.paused:
+            self.ax.cla()
+            self.ax.grid()
+            if len(speed) < 100:
+                self.ax.plot(range(0, len(speed)), speed, color='red')
+            else:
+                self.ax.plot(range(0, 100), speed[-100:], color='red')
+
         self.fig_agg.draw_idle()
-
 
 
 def draw_figure(canvas, figure, loc=(0, 20)):
