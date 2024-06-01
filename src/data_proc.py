@@ -53,16 +53,21 @@ class FakeData(BaseData):
         last_known_time = self.get_data_dict()['time'][-1]
         last_known_speed = self.get_data_dict()['speed'][-1]
         speed_ramp_rate = 1   # mph / sec
+        message = None
         if self.ramp_up:
             interval = update_time - last_known_time
             new_speed = (interval * speed_ramp_rate) + last_known_speed     # y = mx + b
             if new_speed >= 5.0:
                 self.ramp_up = False
-            self._update_raw_data(update_time, round(new_speed, 2), "")
+            self._update_raw_data(update_time, round(new_speed, 2), message)
+            return
         else:
             new_speed = last_known_speed + 0.1 * random.randrange(-5, 5)
             if new_speed > 6:
                 new_speed = 6
+                message = "Max Speed Hit"
             elif new_speed < 3:
                 new_speed = 3
-            self._update_raw_data(update_time, round(new_speed, 2), 'Noisy speed')
+                message = "Min Speed Hit"
+
+            self._update_raw_data(update_time, round(new_speed, 2), message)
