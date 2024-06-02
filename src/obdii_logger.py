@@ -98,7 +98,7 @@ class OBDIILogger:
                 if message.arbitration_id == PID_REPLY:
                     value = self.convert(message.data[2], message.data[3])
 
-                line_out = line_header + value
+                line_out = line_header + str(value)
                 print(line_out, file=self.outfile)
                 self.busy_signal()
 
