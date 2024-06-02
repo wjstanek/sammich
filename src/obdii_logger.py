@@ -94,7 +94,7 @@ class OBDIILogger:
                     pass
                 message = self.thread_queue.get()
 
-                line_header = '{0:f},'.format(message.timestamp)
+                line_header = '{0:.4f},{0:X},'.format(message.timestamp, message.data[2])
                 if message.arbitration_id == PID_REPLY:
                     value = self.convert(message.data[2], message.data[3])
 
@@ -114,19 +114,24 @@ class OBDIILogger:
     @staticmethod
     def convert(pid_found, data):
         if pid_found == THROTTLE_POSITION:
-            return round((data*100/255), 2)
+            # return round((data*100/255), 2)
+            print("Received THROTTLE_POSITION: {data}")
+            return data
         else:
             return data
 
     def busy_signal(self):
+        os.system("echo -e \"\\033[2K\"")
         if self.runtime - self.runtime_counter > 1.0:
             print("...")
+            self.runtime_counter = time.time()
         elif self.runtime - self.runtime_counter > 0.5:
             print("..")
         elif self.runtime - self.runtime_counter > 0.1:
             print(".")
         else:
             pass
+        self.runtime = time.time()
 
 
 if __name__ == '__main__':
