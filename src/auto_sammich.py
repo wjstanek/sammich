@@ -2,6 +2,7 @@ import gui
 import data_proc
 import time
 import PySimpleGUI as sg
+from obdii_logger import OBDIILogger
 
 
 class Sammich:
@@ -12,7 +13,7 @@ class Sammich:
         if fake:
             self.data = data_proc.FakeData()
 
-        self.mygui = gui.SimpleGUI()
+        # self.mygui = gui.SimpleGUI()
 
     def run(self):
         paused = False
@@ -38,13 +39,12 @@ if __name__ == '__main__':
     # Determine if we should spoof data or not
     fake_data = None
     while fake_data not in ['y', 'n']:
-        # fake_data = input("Use fake data? y/n: ")
-        fake_data = 'y'
+        fake_data = input("Use fake data? y/n: ")
 
     if fake_data == 'y':
         print("\t...loading Sammich with FAKE data inputs.")
         sammich = Sammich(fake=True)
     else:
-        print("\t...loading Sammich with REAL data inputs.")
+        print("\t...loading Sammich with REAL data inputs. PLACEHOLDER.")
 
     sammich.run()
