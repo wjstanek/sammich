@@ -31,7 +31,7 @@ class OBDIILogger:
     def can_rx_task(self):
         while True:
             message = self.bus.recv()
-            if message.arbitation_id == PID_REPLY:
+            if message.arbitration_id == PID_REPLY:
                 self.thread_queue.put(message)
 
     def can_tx_task(self):
@@ -81,7 +81,7 @@ class OBDIILogger:
                 message = self.thread_queue.get()
 
                 line_header = '{0:f},'.format(message.timestamp)
-                if message.arbitation_id == PID_REPLY:
+                if message.arbitration_id == PID_REPLY:
                     pid_found = message.data[2]
                     value = self.convert(pid_found, message.data[3])
 
