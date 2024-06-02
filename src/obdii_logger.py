@@ -109,7 +109,7 @@ class OBDIILogger:
             print("Caught keyboard interrupt")
             rx_thread.join()
             tx_thread.join()
-            exit()
+            return
 
     @staticmethod
     def convert(pid_found, data):
