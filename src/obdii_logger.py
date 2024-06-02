@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import can
 import time
-import os
+import os, sys
 import queue
 from threading import Thread
 
@@ -101,7 +101,9 @@ class OBDIILogger:
             self.outfile.close()
             os.system("sudo /sbin/ip link set can0 down")
             print("Caught keyboard interrupt")
-            exit()
+            rx_thread.join()
+            tx_thread.join()
+            sys.exit()
 
     @staticmethod
     def convert(pid_found, data):
