@@ -54,12 +54,13 @@ class OBDIILogger:
         print('Bring up CAN0....')
 
         # Bring up can0 interface at 500kbps
+        os.system("sudo ifconfig can0 txqueuelen 1000")
         os.system("sudo /sbin/ip link set can0 up type can bitrate 500000")
         time.sleep(0.1)
         print('Ready')
 
         try:
-            self.bus = can.interface.Bus(channel='can0', bustype='socketcan_native')
+            self.bus = can.Bus(channel='can0', interface='socketcan')
         except OSError:
             print('Cannot find PiCAN board.')
             GPIO.output(self.ledpin, False)
