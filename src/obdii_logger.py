@@ -44,9 +44,10 @@ class OBDIILogger:
             time.sleep(0.1)
 
     def send_request(self, pid):
-        msg = can.Message(arbitration_id=PID_REQUEST,
+        msg = can.Message(check=True,
+                          arbitration_id=PID_REQUEST,
                           data=[0x02, 0x01, pid, 0x00, 0x00, 0x00, 0x00, 0x00],
-                          extended_id=False)
+                          is_extended_id=False)
         self.bus.send(msg)
 
     def __init__(self):
@@ -99,6 +100,7 @@ class OBDIILogger:
             return round((data*100/255), 2)
         else:
             return data
+
 
 if __name__ == '__main__':
     obdlogger = OBDIILogger()
