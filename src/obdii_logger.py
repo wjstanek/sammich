@@ -34,7 +34,10 @@ class OBDIILogger:
     def can_rx_task(self):
         print("Starting can_rx_task...")
         while True:
-            message = self.bus.recv()
+            try:
+                message = self.bus.recv()
+            except can.CanError as err:
+                print(f"Failed can_rx_task: {err=}, {type(err)=}")
             if message.arbitration_id == PID_REPLY:
                 self.thread_queue.put(message)
 
@@ -56,6 +59,8 @@ class OBDIILogger:
         try:
             self.bus.send(msg)
         except can.CanError as err:
+            print(f"Failed to send request: {err=}, {type(err)=}")
+        except OSError as err:
             print(f"Failed to send request: {err=}, {type(err)=}")
 
     def __init__(self):
