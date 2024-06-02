@@ -2,7 +2,6 @@ import RPi.GPIO as GPIO
 import can
 import time
 import os
-import sys
 import queue
 from threading import Thread
 
@@ -26,7 +25,7 @@ class OBDIILogger:
     GPIO.output(ledpin, True)
 
     bus = None
-    outfile = open('log.txt', 'w')
+    outfile = open(f'logs/log{time.strftime('%Y_%m_%d_%H%M', time.gmtime())}.txt', 'w')
     thread_queue = queue.Queue()
     runtime = 0
     runtime_counter = 0
@@ -94,7 +93,7 @@ class OBDIILogger:
                     pass
                 message = self.thread_queue.get()
 
-                line_header = '{0:.4f},{0:X},'.format(message.timestamp, message.data[2])
+                line_header = '{0:.4f},{0:f},'.format(message.timestamp, message.data[2])
                 if message.arbitration_id == PID_REPLY:
                     value = self.convert(message.data[2], message.data[3])
 
