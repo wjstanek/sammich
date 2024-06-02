@@ -27,14 +27,18 @@ class OBDIILogger:
     bus = None
     outfile = open('log.txt', 'w')
     thread_queue = queue.Queue()
+    runtime = 0
+    runtime_counter = 0
 
     def can_rx_task(self):
+        print("Starting can_rx_task...")
         while True:
             message = self.bus.recv()
             if message.arbitration_id == PID_REPLY:
                 self.thread_queue.put(message)
 
     def can_tx_task(self):
+        print("Starting can_tx_task...")
         while True:
             GPIO.output(self.ledpin, True)
             for pid in [VEHICLE_SPEED, THROTTLE_POSITION]:
@@ -48,7 +52,10 @@ class OBDIILogger:
                           arbitration_id=PID_REQUEST,
                           data=[0x02, 0x01, pid, 0x00, 0x00, 0x00, 0x00, 0x00],
                           is_extended_id=False)
-        self.bus.send(msg)
+        try:
+            self.bus.send(msg)
+        except can.CanError:
+            print("Failed to send.")
 
     def __init__(self):
         print('\n\rCAN Rx test')
@@ -72,20 +79,22 @@ class OBDIILogger:
         tx_thread = Thread(target=self.can_tx_task)
         tx_thread.start()
 
+        self.runtime = time.time()
+
         try:
             while True:
-                pid_found = 0x00
+                value = None
                 while self.thread_queue.empty():
                     pass
                 message = self.thread_queue.get()
 
                 line_header = '{0:f},'.format(message.timestamp)
                 if message.arbitration_id == PID_REPLY:
-                    pid_found = message.data[2]
-                    value = self.convert(pid_found, message.data[3])
+                    value = self.convert(message.data[2], message.data[3])
 
                 line_out = line_header + value
                 print(line_out, file=self.outfile)
+                self.busy_signal()
 
         except KeyboardInterrupt:
             GPIO.output(self.ledpin, False)
@@ -99,6 +108,16 @@ class OBDIILogger:
             return round((data*100/255), 2)
         else:
             return data
+
+    def busy_signal(self):
+        if self.runtime - self.runtime_counter > 1.0:
+            print("...")
+        elif self.runtime - self.runtime_counter > 0.5:
+            print("..")
+        elif self.runtime - self.runtime_counter > 0.1:
+            print(".")
+        else:
+            pass
 
 
 if __name__ == '__main__':
