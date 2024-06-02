@@ -54,8 +54,8 @@ class OBDIILogger:
                           is_extended_id=False)
         try:
             self.bus.send(msg)
-        except can.CanError:
-            print("Failed to send.")
+        except can.CanError as err:
+            print(f"Failed to send request: {err=}, {type(err)=}")
 
     def __init__(self):
         print('\n\rCAN Rx test')
@@ -101,6 +101,7 @@ class OBDIILogger:
             self.outfile.close()
             os.system("sudo /sbin/ip link set can0 down")
             print("Caught keyboard interrupt")
+            exit()
 
     @staticmethod
     def convert(pid_found, data):
