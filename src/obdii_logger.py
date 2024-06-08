@@ -115,7 +115,8 @@ class OBDIILogger:
                     value = self.convert(message.data[2], message.data[3])
 
                 #line_out = line_header + str(value)
-                line_out = f"{message.timestamp}, {message.data[0]}, {message.data[1]}, {message.data[2]}, {message.data[3]}, {message.data[4]}, {message.data[5]}"
+
+                line_out = f"{message.timestamp}, {message.data[0]}, {message.data[1]}, {hex(message.data[2])}, {message.data[3]}, {message.data[4]}, {message.data[5]}"
                 print(line_out, file=self.outfile)
                 self.busy_signal()
 
