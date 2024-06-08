@@ -25,11 +25,11 @@ pids = [
     ENGINE_RPM,
     VEHICLE_SPEED,
     THROTTLE_POSITION,
-    ACCELERATION,
-    STEERING,
-    BRAKING,
-    SHIFT_LEVER,
-    GAS_GAUGE
+    #ACCELERATION,
+    #STEERING,
+    #BRAKING,
+    #SHIFT_LEVER,
+    #GAS_GAUGE
 ]
 
 
@@ -41,7 +41,8 @@ class OBDIILogger:
     GPIO.output(ledpin, True)
 
     bus = None
-    outfile = open(f'logs/log{time.strftime('%Y_%m_%d_%H%M', time.gmtime())}.txt', 'w')
+    log_name = f"log{time.strftime('%Y_%m_%d_%H%M', time.gmtime())}.txt"
+    outfile = open(f'{log_name}', 'w')
     thread_queue = queue.Queue()
     runtime = 0
     runtime_counter = 0
@@ -109,11 +110,12 @@ class OBDIILogger:
                     pass
                 message = self.thread_queue.get()
 
-                line_header = '{0:.4f},{0:f},'.format(message.timestamp, message.data[2])
+                line_header = '{0:.4f},{1:f},'.format(message.timestamp, message.data[2])
                 if message.arbitration_id == PID_REPLY:
                     value = self.convert(message.data[2], message.data[3])
 
-                line_out = line_header + str(value)
+                #line_out = line_header + str(value)
+                line_out = f"{message.timestamp}, {message.data[0]}, {message.data[1]}, {message.data[2]}, {message.data[3]}, {message.data[4]}, {message.data[5]}"
                 print(line_out, file=self.outfile)
                 self.busy_signal()
 
@@ -128,12 +130,13 @@ class OBDIILogger:
 
     @staticmethod
     def convert(pid_found, data):
-        if pid_found == THROTTLE_POSITION:
-            # return round((data*100/255), 2)
-            print("Received THROTTLE_POSITION: {data}")
-            return data
-        else:
-            return data
+        #if pid_found == THROTTLE_POSITION:
+        #    # return round((data*100/255), 2)
+        #    print("Received THROTTLE_POSITION: {data}")
+        #    return data
+        #else:
+        #    return data
+        return data
 
     def busy_signal(self):
         os.system("echo -e \"\\033[2K\"")
