@@ -11,10 +11,26 @@ ENGINE_RPM = 0x0C
 VEHICLE_SPEED = 0x0D
 MAF_SENSOR = 0x10
 O2_VOLTAGE = 0x14
-THROTTLE_POSITION = 0x11
+THROTTLE_POSITION = 0x11    # verified on Subaru
+ACCELERATION = 0x23
+STEERING = 0x25
+BRAKING = 0x30
+SHIFT_LEVER = 0x540
+GAS_GAUGE = 0x5A4
 
 PID_REQUEST = 0x7DF
 PID_REPLY = 0x7E8
+
+pids = [
+    ENGINE_RPM,
+    VEHICLE_SPEED,
+    THROTTLE_POSITION,
+    ACCELERATION,
+    STEERING,
+    BRAKING,
+    SHIFT_LEVER,
+    GAS_GAUGE
+]
 
 
 class OBDIILogger:
@@ -44,7 +60,7 @@ class OBDIILogger:
         print("Starting can_tx_task...")
         while True:
             GPIO.output(self.ledpin, True)
-            for pid in [VEHICLE_SPEED, THROTTLE_POSITION]:
+            for pid in pids:
                 self.send_request(pid)
                 time.sleep(0.05)
             GPIO.output(self.ledpin, False)
