@@ -7,7 +7,7 @@ from threading import Thread
 
 # standard OBDII PIDs
 ENGINE_COOLANT_TEMP = 0x05
-ENGINE_RPM = 0x0C
+ENGINE_RPM = 0x0C   # verified
 VEHICLE_SPEED = 0x0D
 MAF_SENSOR = 0x10
 O2_VOLTAGE = 0x14
@@ -26,10 +26,10 @@ pids = {
     "VEHICLE_SPEED": VEHICLE_SPEED,
     "THROTTLE_POSITION": THROTTLE_POSITION,
     "ACCELERATION": ACCELERATION,
-    # STEERING,
-    # BRAKING,
-    # SHIFT_LEVER,
-    # GAS_GAUGE
+    "STEERING": STEERING,
+    "BRAKING": BRAKING,
+    "SHIFT_LEVER": SHIFT_LEVER,
+    "GAS_GAUGE": GAS_GAUGE,
 }
 
 
@@ -118,7 +118,7 @@ class OBDIILogger:
                 pid_name = self.get_pid_key(message.data[2])
                 line_out = f"{message.timestamp}, {message.data[0]}, {message.data[1]}, {pid_name}, {message.data[3]}, {message.data[4]}, {message.data[5]}"
                 print(line_out, file=self.outfile)
-                self.busy_signal()
+                print(line_out)
 
         except KeyboardInterrupt:
             GPIO.output(self.ledpin, False)
