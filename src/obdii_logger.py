@@ -11,8 +11,8 @@ ENGINE_RPM = 0x0C
 VEHICLE_SPEED = 0x0D
 MAF_SENSOR = 0x10
 O2_VOLTAGE = 0x14
-THROTTLE_POSITION = 0x11    # verified on Subaru
-ACCELERATION = 0x17 #23
+THROTTLE_POSITION = 0xF4
+ACCELERATION = 0x17     # 23
 STEERING = 0x25
 BRAKING = 0x30
 SHIFT_LEVER = 0x540
@@ -21,16 +21,16 @@ GAS_GAUGE = 0x5A4
 PID_REQUEST = 0x7DF
 PID_REPLY = 0x7E8
 
-pids = [
-    ENGINE_RPM,
-    VEHICLE_SPEED,
-    THROTTLE_POSITION,
-    ACCELERATION,
-    #STEERING,
-    #BRAKING,
-    #SHIFT_LEVER,
-    #GAS_GAUGE
-]
+pids = {
+    ENGINE_RPM: "ENGINE_RPM",
+    VEHICLE_SPEED: "VEHICLE_SPEED",
+    THROTTLE_POSITION: "THROTTLE_POSITION",
+    ACCELERATION: "ACCELERATION",
+    # STEERING,
+    # BRAKING,
+    # SHIFT_LEVER,
+    # GAS_GAUGE
+}
 
 
 class OBDIILogger:
@@ -61,8 +61,8 @@ class OBDIILogger:
         print("Starting can_tx_task...")
         while True:
             GPIO.output(self.ledpin, True)
-            for pid in pids:
-                self.send_request(pid)
+            for k, v in pids:
+                self.send_request(k)
                 time.sleep(0.05)
             GPIO.output(self.ledpin, False)
             time.sleep(0.1)
@@ -116,7 +116,7 @@ class OBDIILogger:
 
                 #line_out = line_header + str(value)
 
-                line_out = f"{message.timestamp}, {message.data[0]}, {message.data[1]}, {hex(message.data[2])}, {message.data[3]}, {message.data[4]}, {message.data[5]}"
+                line_out = f"{message.timestamp}, {message.data[0]}, {message.data[1]}, {pids[(message.data[2])]}, {message.data[3]}, {message.data[4]}, {message.data[5]}"
                 print(line_out, file=self.outfile)
                 self.busy_signal()
 
