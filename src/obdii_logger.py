@@ -22,10 +22,10 @@ PID_REQUEST = 0x7DF
 PID_REPLY = 0x7E8
 
 pids = {
-    ENGINE_RPM: "ENGINE_RPM",
-    VEHICLE_SPEED: "VEHICLE_SPEED",
-    THROTTLE_POSITION: "THROTTLE_POSITION",
-    ACCELERATION: "ACCELERATION",
+    "ENGINE_RPM": ENGINE_RPM,
+    "VEHICLE_SPEED": VEHICLE_SPEED,
+    "THROTTLE_POSITION": THROTTLE_POSITION,
+    "ACCELERATION": ACCELERATION,
     # STEERING,
     # BRAKING,
     # SHIFT_LEVER,
@@ -61,8 +61,8 @@ class OBDIILogger:
         print("Starting can_tx_task...")
         while True:
             GPIO.output(self.ledpin, True)
-            for k, v in pids:
-                self.send_request(k)
+            for pid in pids:
+                self.send_request(pids[pid])
                 time.sleep(0.05)
             GPIO.output(self.ledpin, False)
             time.sleep(0.1)
@@ -115,8 +115,8 @@ class OBDIILogger:
                     value = self.convert(message.data[2], message.data[3])
 
                 #line_out = line_header + str(value)
-
-                line_out = f"{message.timestamp}, {message.data[0]}, {message.data[1]}, {pids[(message.data[2])]}, {message.data[3]}, {message.data[4]}, {message.data[5]}"
+                pid_name = self.get_pid_key(message.data[2])
+                line_out = f"{message.timestamp}, {message.data[0]}, {message.data[1]}, {pid_name}, {message.data[3]}, {message.data[4]}, {message.data[5]}"
                 print(line_out, file=self.outfile)
                 self.busy_signal()
 
@@ -152,6 +152,13 @@ class OBDIILogger:
             pass
         self.runtime = time.time()
 
+    @staticmethod
+    def get_pid_key(pid) -> str:
+        for key in pids:
+            if pids[key] == pid:
+                return key
+            else:
+                return "Unknown"
 
 if __name__ == '__main__':
     obdlogger = OBDIILogger()
