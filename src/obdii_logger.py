@@ -157,8 +157,7 @@ class OBDIILogger:
         for key in pids:
             if pids[key] == pid:
                 return key
-            else:
-                return "Unknown"
+        return "Unknown"
 
 if __name__ == '__main__':
     obdlogger = OBDIILogger()
